@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>humAIzed - Elevate Your Voice</title>
+    <style>
+        /* General Styling */
+        body {
+            background: linear-gradient(145deg, #0d0d0d, #1c1c1c);
+            color: #e0e0e0;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* Header Styling */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #1e1e1e;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.7);
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #a277ff;
+        }
+
+        .logo span {
+            color: #03dac6; /* Highlighted A and I */
+        }
+
+        .top-nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .top-nav button {
+            padding: 10px 15px;
+            background: #242424;
+            color: #f0f0f0;
+            border: 2px solid #a277ff;
+            border-radius: 30px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .top-nav button:hover {
+            background: #a277ff;
+            transform: scale(1.1);
+        }
+
+        /* Hero Section Styling */
+        .hero-section {
+            text-align: center;
+            padding: 40px 20px;
+            color: #f0f0f0;
+        }
+
+        .hero-section h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 0px 3px 8px #432d6c;
+        }
+
+        .hero-section h1 span {
+            color: #03dac6;
+        }
+
+        .hero-section p {
+            font-size: 1.2em;
+            margin-top: 10px;
+            color: #a0a0a0;
+        }
+
+        /* Text Conversion Box */
+        .text-box {
+            margin: 40px auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            background: #1b1b1b;
+            border-radius: 12px;
+            border: 2px solid #03dac6;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        #output {
+            min-height: 150px;
+            padding: 15px;
+            background: #242424;
+            color: #ffffff;
+            font-size: 1.2em;
+            overflow: auto;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+        }
+
+        .virtual-keyboard {
+            margin-top: 10px;
+            display: none; /* Hidden initially */
+        }
+
+        /* Buttons Section */
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .buttons button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .buttons button:hover {
+            transform: scale(1.1);
+        }
+
+        #start-btn {
+            background-color: #03dac6;
+        }
+
+        #stop-btn {
+            background-color: #cf6679;
+        }
+
+        #copy-btn, #whatsapp-btn, #email-btn {
+            background-color: #a277ff;
+        }
+
+        /* How to Use Section */
+        .how-to-use {
+            margin: 40px auto;
+            width: 90%;
+            max-width: 800px;
+            padding: 20px;
+            background: #1e1e1e;
+            border: 2px solid #bb86fc;
+            border-radius: 12px;
+        }
+
+        .how-to-use h2 {
+            color: #03dac6;
+            text-align: center;
+        }
+
+        .how-to-use ol {
+            list-style-type: decimal;
+            padding-left: 20px;
+            color: #e0e0e0;
+        }
+
+        .how-to-use ol li {
+            margin: 10px 0;
+        }
+
+        /* Footer Styling */
+        footer {
+            text-align: center;
+            padding: 15px;
+            background: #121212;
+            color: #a0a0a0;
+            font-size: 0.9em;
+        }
+
+        footer span {
+            color: #ff5e5e;
+        }
+
+        footer a {
+            text-decoration: none;
+            color: #03dac6;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">hum<span>AI</span>zed</div>
+        <div class="top-nav">
+            <button>Use Case</button>
+            <button>How to Use</button>
+            <button>Login</button>
+        </div>
+    </header>
+
+    <section class="hero-section">
+        <h1>Revolutionize Your Workflow with <span>humAIzed</span></h1>
+        <p>The AI-powered voice-to-text solution tailored for CXOs and top executives.</p>
+    </section>
+
+    <div class="text-box">
+        <div id="output" contenteditable="true">Click here to start speaking or edit your text...</div>
+        <div class="virtual-keyboard"> <!-- Virtual keyboard to be shown dynamically --></div>
+        <div class="buttons">
+            <button id="start-btn">Start Listening</button>
+            <button id="stop-btn" disabled>Stop Listening</button>
+            <button id="copy-btn">Copy Text</button>
+            <button id="whatsapp-btn">Share via WhatsApp</button>
+            <button id="email-btn">Share via Email</button>
+        </div>
+    </div>
+
+    <section class="how-to-use">
+        <h2>How to Use</h2>
+        <ol>
+            <li>Click "Start Listening" to begin converting your voice to text.</li>
+            <li>Edit the text directly in the text box or use the virtual keyboard.</li>
+            <li>Click "Copy Text" to copy the content to your clipboard.</li>
+            <li>Share the text with your team via WhatsApp or Email instantly.</li>
+            <li>When finished, click "Stop Listening".</li>
+        </ol>
+    </section>
+
+    <footer>
+        <p>Made with <span>❤️</span> by <a href="#">humAIzed</a>.</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
