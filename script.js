@@ -1,99 +1,145 @@
-let recognition;
-let listening = false;
+// Selectors for voice-to-text functionality
+const startListeningButton = document.getElementById('start');
+const stopListeningButton = document.getElementById('stop');
+const copyTextButton = document.getElementById('copy');
+const shareWhatsAppButton = document.getElementById('send-whatsapp');
+const shareEmailButton = document.getElementById('send-email');
+const outputBox = document.getElementById('output');
 
-// Speech recognition setup
+// Selectors for recording functionality
+const recordButton = document.getElementById('record');
+const stopRecordButton = document.getElementById('stop-record');
+const sendRecordWhatsAppButton = document.getElementById('send-record-whatsapp');
+const sendRecordEmailButton = document.getElementById('send-record-email');
+
+// Additional UI elements
+const micIcon = document.getElementById('mic-icon'); // Dynamic mic icon
+
+// Speech Recognition setup
+let recognition;
+let isListening = false;
+
 if ('webkitSpeechRecognition' in window) {
     recognition = new webkitSpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = 'en-GB'; // UK English. Change to 'en-AE' for UAE.
+    recognition.lang = 'en-GB'; // Adjust for UK and UAE accents
 
-    recognition.onstart = () => console.log("Voice recognition started.");
-    recognition.onend = () => console.log("Voice recognition ended.");
-    recognition.onerror = (event) => console.error("Error: ", event.error);
+    let finalTranscript = ''; // To store the complete transcript
 
     recognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-            .map(result => result[0].transcript)
-            .join('');
-        document.getElementById('output').innerText = transcript;
+        let interimTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+            } else {
+                interimTranscript += event.results[i][0].transcript;
+            }
+        }
+        outputBox.innerHTML = `<p>${finalTranscript}</p><p style="color:gray;">${interimTranscript}</p>`;
+    };
+
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+    };
+
+    recognition.onend = () => {
+        if (isListening) {
+            recognition.start(); // Restart recognition for continuous mode
+        }
     };
 } else {
-    alert("Your browser does not support speech recognition. Please try Chrome.");
+    alert('Speech Recognition not supported in this browser. Please use Google Chrome.');
 }
 
-// Event listeners for buttons
-document.getElementById('start-btn').onclick = () => {
-    if (!listening) {
+// Start listening
+startListeningButton.addEventListener('click', () => {
+    if (recognition && !isListening) {
         recognition.start();
-        listening = true;
-        document.getElementById('start-btn').disabled = true;
-        document.getElementById('stop-btn').disabled = false;
+        isListening = true;
+        updateMicState(true);
     }
-};
+});
 
-document.getElementById('stop-btn').onclick = () => {
-    if (listening) {
+// Stop listening
+stopListeningButton.addEventListener('click', () => {
+    if (recognition && isListening) {
         recognition.stop();
-        listening = false;
-        document.getElementById('start-btn').disabled = false;
-        document.getElementById('stop-btn').disabled = true;
+        isListening = false;
+        updateMicState(false);
     }
-};
+});
 
-document.getElementById('copy-btn').onclick = () => {
-    const text = document.getElementById('output').innerText;
-    navigator.clipboard.writeText(text)
-        .then(() => alert("Text copied to clipboard!"))
-        .catch(err => console.error("Error copying text: ", err));
-};
-
-document.getElementById('whatsapp-btn').onclick = () => {
-    const text = encodeURIComponent(document.getElementById('output').innerText);
-    window.open(`https://wa.me/?text=${text}`, '_blank');
-};
-
-document.getElementById('email-btn').onclick = () => {
-    const text = encodeURIComponent(document.getElementById('output').innerText);
-    window.open(`mailto:?subject=Shared Text&body=${text}`, '_blank');
-};
-
-// Virtual keyboard setup
-function showKeyboard() {
-    const keyboardContainer = document.getElementById('virtual-keyboard');
-    keyboardContainer.style.display = 'flex';
-    keyboardContainer.innerHTML = '';
-
-    const keys = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
-    keys.forEach(key => {
-        const keyButton = document.createElement('button');
-        keyButton.innerText = key;
-        keyButton.onclick = () => insertKey(key);
-        keyboardContainer.appendChild(keyButton);
+// Copy text functionality
+copyTextButton.addEventListener('click', () => {
+    const text = outputBox.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Text copied to clipboard!');
     });
+});
 
-    // Special keys
-    ['Backspace', 'Space', 'Enter'].forEach(key => {
-        const specialKey = document.createElement('button');
-        specialKey.innerText = key;
-        specialKey.classList.add('special-key');
-        specialKey.onclick = () => handleSpecialKey(key);
-        keyboardContainer.appendChild(specialKey);
+// Share text via WhatsApp
+shareWhatsAppButton.addEventListener('click', () => {
+    const text = outputBox.innerText;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, '_blank');
+});
+
+// Share text via Email
+shareEmailButton.addEventListener('click', () => {
+    const text = outputBox.innerText;
+    const emailUrl = `mailto:?subject=Voice-to-Text&body=${encodeURIComponent(text)}`;
+    window.open(emailUrl, '_blank');
+});
+
+// Audio recording setup
+let mediaRecorder;
+let audioChunks = [];
+
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+            audioChunks = []; // Clear audio chunks after recording
+
+            sendRecordWhatsAppButton.addEventListener('click', () => {
+                alert('Sharing recordings via WhatsApp requires server-side support.');
+            });
+
+            sendRecordEmailButton.addEventListener('click', () => {
+                alert('Sharing recordings via Email requires server-side support.');
+            });
+        };
     });
+} else {
+    alert('Audio recording not supported in this browser.');
 }
 
-function insertKey(key) {
-    const output = document.getElementById('output');
-    output.innerText += key;
-}
-
-function handleSpecialKey(key) {
-    const output = document.getElementById('output');
-    if (key === 'Backspace') {
-        output.innerText = output.innerText.slice(0, -1);
-    } else if (key === 'Space') {
-        output.innerText += ' ';
-    } else if (key === 'Enter') {
-        output.innerText += '\n';
+// Start recording
+recordButton.addEventListener('click', () => {
+    if (mediaRecorder) {
+        mediaRecorder.start();
+        updateMicState(true);
+        alert('Recording started!');
     }
+});
+
+// Stop recording
+stopRecordButton.addEventListener('click', () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        updateMicState(false);
+        alert('Recording stopped!');
+    }
+});
+
+// Helper functions
+function updateMicState(isActive) {
+    micIcon.style.color = isActive ? '#c084fc' : '#fff';
 }
